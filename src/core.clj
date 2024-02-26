@@ -4,16 +4,16 @@
   (:require [clojure.string :as str])
   (:require [clojure.tools.cli :refer [parse-opts]]))
 
-(def parser-agent (agent "0"))
-(def worker-agent (agent {:count 0 :points []}))
-(def printer-agent (agent "0"))
-(def lagrange-agent (agent {:num 0 :ans 0}))
-(def linear-agent (agent {:num 0 :ans 0}))
+(def parser-agent (agent "0")) ;; Агент для преобразования строки в точку
+(def worker-agent (agent {:count 0 :points []})) ;; Послыает запросы на линейнуюи нетрполяцию и интерполяцию лагранжа 
+(def printer-agent (agent "0")) ;; Общий ввывод текста на стандартный поток вывода
+(def lagrange-agent (agent {:num 0 :ans 0})) ;; Агент для интерполяции Лагранжем
+(def linear-agent (agent {:num 0 :ans 0})) ;; Агент для линейной интерполяции
 
 (defn print-line [line]
-  (send printer-agent (fn [_] line)))
+  (send printer-agent (fn [_] line))) ;; Обертка для отправки текста на стандартный поток вывода через Агента
 
-(defn make-struct [n x y]
+(defn make-struct [n x y] ;; Создание окна, если в окне уже есть N элементов, то новый элемент замещает самый первый.
   (fn [state]
     (let [points (:points state)
           counter (:count state)
@@ -23,9 +23,9 @@
         (assoc state :count (inc counter) :points (conj points [x y]))
 
         :else
-        (assoc state :count (inc counter) :points (conj (vec (rest points)) [x y]))))))
+        (assoc state :count (inc counter) :points (conj (vec (rest points)) [x y])))))) 
 
-(defn parser-watch [n]
+(defn parser-watch [n] ;; Функция-слушатель для преобразования строки в точку
   (fn [_key _agent _old-state new-state]
     (cond
       (nil? new-state)
@@ -38,7 +38,7 @@
         (print-line (str "x: " x ", y: " y))
         (send worker-agent (make-struct n x y))))))
 
-(defn worker-watch [n f b-linear b-lagrange]
+(defn worker-watch [n f b-linear b-lagrange] ;; Функция-слушатель агена послыки запросов интерполяции
   (fn [_key _agent _old-state new-state]
     (let [points (:points new-state)
           size (count (:points new-state))
@@ -56,7 +56,7 @@
       (when (and is-sized b-lagrange)
         (send-interpolation lagrange-agent lagrange/lagrange-interpolation)))))
 
-(defn printer-watch []
+(defn printer-watch [] ;; Функция-слушатель для вывода строки
   (fn [_key _agent _old-state new-state]
     (println new-state)))
 
