@@ -24,4 +24,4 @@
         values-mapped (utils/map-double values)]
     (mapv vector keys-mapped values-mapped)))
 
-;; (lagrange-interpolation [[9.0 53.0] [10.0 34.0] [12.0 56.0]] 1)
+;; (lagrange-interpolation [[9.0 53.0] [10.0 34.0] [12.0 56.0]] 1) test
