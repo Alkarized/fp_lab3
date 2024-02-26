@@ -5,3 +5,5 @@
 (deftest check1
   (testing "test1"
     (is (= 1 1))))
+
+(run-tests)

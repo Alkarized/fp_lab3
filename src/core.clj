@@ -23,7 +23,7 @@
         (assoc state :count (inc counter) :points (conj points [x y]))
 
         :else
-        (assoc state :count (inc counter) :points (conj (vec (rest points)) [x y])))))) 
+        (assoc state :count (inc counter) :points (conj (vec (rest points)) [x y]))))))
 
 (defn parser-watch [n] ;; Функция-слушатель для преобразования строки в точку
   (fn [_key _agent _old-state new-state]
@@ -60,21 +60,21 @@
   (fn [_key _agent _old-state new-state]
     (println new-state)))
 
-(defn linear-watch []
+(defn linear-watch [] ;; Функция-слушатель, которая выводит результаты линейной интерполяции
   (fn [_key _agent _old-state new-state]
     (print-line (str "-----------------\n"
                      "linear values for i: " (:num new-state) "\n"
                      "pairs: " (:ans new-state) "\n"
                      "-----------------"))))
 
-(defn lagrange-watch []
+(defn lagrange-watch [] ;; Функция-слушатель, которая выводит результаты интерполяции Лагранжа
   (fn [_key _agent _old-state new-state]
     (print-line (str "-----------------\n"
                      "lagrange values for i: " (:num new-state) "\n"
                      "pairs: " (:ans new-state) "\n"
                      "-----------------"))))
 
-(defn recur-reader [line]
+(defn recur-reader [line] ;; Рекурсивное чтение данных с потока ввода
   (send parser-agent (fn [_state] line))
   (cond
     (nil? line)
@@ -83,7 +83,7 @@
     :else
     (recur (read-line))))
 
-(def cli-options [["-h" "--help"
+(def cli-options [["-h" "--help" ;; Опции для старта программы
                    :desc "Print help Message"
                    :default false]
                   ["-w" "--window NUMBER"
@@ -103,7 +103,7 @@
                    :desc "Use lagrange interpolation"
                    :default false]])
 
-(defn -main [& args]
+(defn -main [& args] ;; Основная функция - общий запуск приложения
 
   (let [{:keys [options _arguments errors summary]} (parse-opts args cli-options)]
 
@@ -119,6 +119,7 @@
       (println summary)
       (System/exit 0))
 
+    ;; Накидываем для всех агентов функции-слушатели, которые запускается при изменении значения Агента
     (add-watch parser-agent :watch-key (parser-watch (:window options)))
     (add-watch printer-agent :watch-key (printer-watch))
     (add-watch worker-agent :watch-key (worker-watch (:window options) (:frequency options) (:linear options) (:lagrange options)))
